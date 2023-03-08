@@ -117,4 +117,26 @@ public class MemberDAO extends AbstractDAO<Member> implements IMemberDAO {
 		}
 		return null;
 	}
+
+	@Override
+	public List<Member> findAllByGender(Byte gender) {
+		sql = new StringBuilder("SELECT * FROM member where gender=?");
+		List<Member> members = new ArrayList<Member>();
+		try {
+			ps = connection.prepareStatement(sql.toString());
+			ps.setByte(1, gender);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				members.add(new Member(rs.getLong("id"), rs.getString("email"), rs.getString("password"),
+						rs.getString("fullname"), rs.getString("dob"), rs.getByte("gender"),
+						rs.getString("educational_level"), rs.getString("address"), rs.getString("city"),
+						rs.getString("district"), rs.getString("ward"), rs.getString("phone")));
+			}
+			return members;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

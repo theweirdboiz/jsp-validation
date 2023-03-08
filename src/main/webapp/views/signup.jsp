@@ -65,7 +65,6 @@
 				</div>
 			</div>
 		</div>
-		<div class="form__message"></div>
 
 		<div class="form__group">
 			<label class="form__label" for="educationalLevel">Trình độ
@@ -79,7 +78,6 @@
 				<option>Tiến sĩ</option>
 			</select>
 		</div>
-		<div class="form__message"></div>
 
 		<div class="form__group">
 			<label class="form__label" for="address">Địa chỉ:</label>
@@ -96,7 +94,6 @@
 				<option>Tiến sĩ</option>
 			</select>
 		</div>
-		<div class="form__message"></div>
 
 		<div class="form__group">
 			<label class="form__label" for="district">Quận:</label> <select
@@ -109,7 +106,6 @@
 				<option>Tiến sĩ</option>
 			</select>
 		</div>
-		<div class="form__message"></div>
 
 		<div class="form__group">
 			<label class="form__label" for="ward">Phường:</label><select
@@ -127,166 +123,138 @@
 				class="form__input" placeholder="Nhập địa số điện thoại" id="phone"
 				name="phone" />
 		</div>
-		<div class="form__message"></div>
-
 		<button class="form__submit">Submit</button>
 	</form>
 
 	<script>
 		$(document).ready(function() {
-			let rules = true;
-			//check email
-			function isValidEmail(email) {
-            const regex = /^\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i;
-            return regex.test(email);
-        }
-			function isValidPassword(password) {
-				const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-				return regex.test(password);
-			}
-			function isValidRepassword(password,repassword) {
-				return password==repassword;
-			}
-			function isValidDob(dob) {
-				const regex = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
-				return regex.test(dob);
-			}
-			const sendEmail = (data,element)=> {
-				$.ajax({
-					url: `${validationUrl}`,
-					type: "GET",
-					contentType: 'application/json',
-					data: {
-						email:data
-					},
-					dataType: 'text',
-					success: function(res) {
-						if(res.trim()=='true') {
-							element.text("Email đã tồn tại, hãy thử lại");
-						}
-					}, error: function(error) {
-						console.log(error);
+			const inputElms = $("input.required");
+			// $(".form__submit").attr("disabled",true);
+			let value="";
+			let isValid = false;
+			$.each(inputElms , function (index, inputElm){
+				//on blur
+				$(this).blur(function(){
+					//vaidation
+					if($(this).val()==""){
+						$(this).css({"color":"red","border":"1px solid red"}).parent().siblings(".form__message").eq(index).text("Vui lòng không bỏ trống trường này!")
 					}
-				})
-			}
-			const sendPassword = (data)=> {
-				$.ajax({
-					url: `${validationUrl}`,
-					type: "GET",
-					contentType: 'application/json',
-					data: {
-						password:data
-					},
-					dataType: 'text',
-					success: function(res) {
-						
-
-					}, error: function(error) {
-						console.log(error);
+					if($(this).is('[name="email"]')){
+						value = $(this).val();
+						$.ajax("/validation-ajax/validation?type=email", {
+							type : 'POST',
+							data: { email: value},
+							success:function(res){
+								if(res==0) {
+									$(inputElm).css({"color":"red","border":"1px solid red"}).parent().siblings(".form__message").eq(index).text("Email đã tồn tại!")
+								}
+							},
+							error:function(err){
+								console.log(err);
+							}
+					})
 					}
-				})
-			}
-			const sendDob = (element)=> {
-				$.ajax({
-					url: `${checkEmailURL}`,
-					type: "GET",
-					contentType: 'application/json',
-					data: {
-						password:element.value
-					},
-					dataType: 'text',
-					success: function(res) {
-							
-
-					}, error: function(error) {
-						console.log(error);
+					if($(this).is('[name="password"]')){
+						value = $(this).val();
+						$.ajax("/validation-ajax/validation?type=password", {
+							type : 'POST',
+							data: { password: value},
+							success:function(res){
+								if(res==0) {
+									$(inputElm).css({"color":"red","border":"1px solid red"}).parent().siblings(".form__message").eq(index).text("Mật khẩu ít nhất 8 kí tự!")
+								}
+							},
+							error:function(err){
+								console.log(err);
+							}
+					})
 					}
-				})
-			}
-			//add new
-			const addMember = (data) => {
-				$.ajax({
-					url: `${APIurl}`,
-					type: "POST",
-					contentType: 'application/json',
-					data: JSON.stringify(data),
-					dataType: 'json',
-					success: function(res) {
-						console.log(res);
-						window.location.href = `${NewURL}`;
-						console.log("${NewURL}")
-					}, error: function(error) {
-						console.log(error);
+					if($(this).is('[name="repassword"]')){
+						let password = $("input[name='password']").val();
+						value = $(this).val();
+						$.ajax("/validation-ajax/validation?type=repassword", {
+							type : 'POST',
+							data: { repassword: value, password: password},
+							success:function(res){
+								if(res==0) {
+									$(inputElm).css({"color":"red","border":"1px solid red"}).parent().siblings(".form__message").eq(index).text("Mật khẩu không tương ứng!")
+								}
+							},
+							error:function(err){
+								console.log(err);
+							}
+					})
 					}
-				})
-			}
-			
-			const inputs = $('input.required');
-			const btnSubmit = $('.form__submit');
-			$(btnSubmit).prop("disabled", true);
-
-			inputs.each(function(idx) {
-				const parentElm = $(this).parent();
-				const messageElm = $(parentElm).next();
-				$(this).on('blur',function(e){
-					e.target.value == "" &&	$(messageElm).text("Dữ liệu này trống")
-				});
-
-				$(this).on('input',function(e){
-					let data = e.target.value;
-					messageElm.text("");
-					if(isValidEmail(data)){
-						sendEmail(data,messageElm);
+					if($(this).is('[name="dob"]')){
+						value = $(this).val();
+						$.ajax("/validation-ajax/validation?type=dob", {
+							type : 'POST',
+							data: { dob: value},
+							success:function(res){
+								if(res==0) {
+									$(inputElm).css({"color":"red","border":"1px solid red"}).parent().siblings(".form__message").eq(index).text("Ngày không hợp lệ!")
+								}
+							},
+							error:function(err){
+								console.log(err);
+							}
+					})
 					}
 					else {
-						rules = false;
-						messageElm.text("Email không hợp lệ, hãy thử lại");
+						isValid = true;
+						$(this).css({"color":"black","border":"1px solid #ddd"}).parent().siblings(".form__message").eq(index).text("")
 					}
-					
-					if(isValidPassword(data)) {
-						messageElm.text("");
-					}
-					else {
-						rules = false;
-						messageElm.text("Password phải có ít nhất 8 kí tự, 1 ký tự in hoa và 1 ký tự đặc biệt");
-					}
-					if(!isValidRepassword($("input[name='password']").val(),data)) {
-						rules = false;
-						messageElm.text("Mật khẩu không tương ứng, thử lại");
-					}
-					else {
-						messageElm.text("");
-					}
-					if(!isValidDob(data)) {
-						rules = false;
-						messageElm.text("Không đúng định dạng dd/mm/yyyy");
-					}
-					else {
-						messageElm.text("");
-					}
-				});
-			})
-			
-			btnSubmit.click(function(e) {
-				e.preventDefault();
-				const data = {};
-				const formData = $("#form__sign-up").serializeArray();
+					//end
+				})
 				
-				formData.map((item) => {
-					if(item.name!=='repassword'){
-					data[item.name] = item.value;						
-					}
+				//on input change
+				$(this).on('input',function(){
+					$(this).css({"color":"black","border":"1px solid #ddd"}).parent().siblings(".form__message").eq(index).text("")
 				})
-				if(rules) {
-					addMember(data);	
+			});
+			
+			$("#form__sign-up").submit(function(e){
+			    e.preventDefault();
+				if(isValid) {
+					let password = $("input[name='password']").val();
+					let email = $("input[name='email']").val();
+					let fullname = $("input[name='fullname']").val();
+					let dob = $("input[name='dob']").val();
+					let gender = $("input[name='gender']").val();
+					let educationalLevel = $("input[name='educationalLevel']").val();
+					let address = $("input[name='address']").val();
+					let city = $("input[name='city']").val();
+					let ward = $("input[name='ward']").val();
+					let district = $("input[name='district']").val();
+					let phone = $("input[name='phone']").val();
+					
+					value =  { email: email, password: password, fullname: fullname, dob:dob,
+							gender: gender, educationalLevel: educationalLevel, address:address,
+							city:city, ward:ward,district:district,
+							phone:phone
+							}
+					
+					$.ajax("/validation-ajax/add-member", {
+						type : 'POST',
+						contentType: "application/json; charset=utf-8",
+			            dataType: 'json',
+						data: JSON.stringify(value),
+						success:function(res){
+							alert("Welcome "+fullname+"!");
+
+						},
+						error:function(err){
+							alert("Add member fail!");
+
+						}
+				})
 				}
 				else {
-				    alert("Bạn phải điền các thông tin có dấu *");
-					$(btnSubmit).prop("disabled", true);
+					console.log("invalid");
+
 				}
 			})
-
-		});
+        })
 		</script>
 </body>
 </html>

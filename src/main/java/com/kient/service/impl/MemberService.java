@@ -34,4 +34,10 @@ public class MemberService implements IMemberService {
 		return memberDAO.findByEmail(email);
 	}
 
+	@Override
+	public List<Member> findAllByGender(Byte gender) {
+		// TODO Auto-generated method stub
+		return memberDAO.findAllByGender(gender);
+	}
+
 }

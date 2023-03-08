@@ -1,6 +1,7 @@
 package com.kient.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -30,9 +31,13 @@ public class AddMemberController extends HttpServlet {
 			throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-		Member newMember = new Gson().fromJson(request.getReader(), Member.class);
-		System.out.println(newMember.toString());
-		memberService.save(newMember);
+		Member newMember = memberService.save(new Gson().fromJson(request.getReader(), Member.class));
+		PrintWriter pw = response.getWriter();
+		if (newMember != null) {
+			pw.println(1);
+		} else {
+			pw.println(0);
+		}
 	}
 
 }

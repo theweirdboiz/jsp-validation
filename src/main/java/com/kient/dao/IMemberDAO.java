@@ -6,6 +6,8 @@ import com.kient.model.Member;
 
 public interface IMemberDAO {
 	public List<Member> findAll();
+	public List<Member> findAllByGender(Byte gender);
+
 
 	public Member findOne(long id);
 

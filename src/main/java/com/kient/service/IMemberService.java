@@ -8,6 +8,7 @@ public interface IMemberService {
 	public Member save(Member member);
 
 	public List<Member> findAll();
+	public List<Member> findAllByGender(Byte gender);
 
 	public Member findOne(Long id);
 

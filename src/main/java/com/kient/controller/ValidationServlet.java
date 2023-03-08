@@ -33,14 +33,14 @@ public class ValidationServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String email = request.getParameter("email");
-		String password = request.getParameter("password");
-		
-		Member member = memberService.findByEmail(email);
-		response.setContentType("text/html");
-		PrintWriter pw = response.getWriter();
-		boolean result = member != null ? true : false;
-		pw.println(result);
+//		String email = request.getParameter("email");
+//		String password = request.getParameter("password");
+
+//		Member member = memberService.findByEmail(email);
+//		response.setContentType("text/html");
+//		PrintWriter pw = response.getWriter();
+//		boolean result = member != null ? true : false;
+//		pw.println(result);
 	}
 
 	/**
@@ -50,7 +50,58 @@ public class ValidationServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		doGet(request, response);
+		String dobPattern = "^(0[1-9]|1[012])/(0[1-9]|[12][0-9]|[3][01])/\\d{4}$";
+		String type = request.getParameter("type");
+		response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+		Member member = null;
+		PrintWriter pw = null;
+		switch (type) {
+		case "email":
+			String email = request.getParameter("email");
+			member = memberService.findByEmail(email);
+			response.setContentType("text/plain");
+			pw = response.getWriter();
+			if (member == null) {
+				pw.println(1);
+			} else {
+				pw.println(0);
+			}
+			break;
+		case "password":
+			String password = request.getParameter("password");
+			pw = response.getWriter();
+			if (password.length() >= 8) {
+				pw.println(1);
+			} else {
+				pw.println(0);
+			}
+			break;
+		case "repassword":
+			password = request.getParameter("password");
+			String repassword = request.getParameter("repassword");
+			response.setContentType("text/html");
+			pw = response.getWriter();
+			if (password.equals(repassword)) {
+				pw.println(1);
+			} else {
+				pw.println(0);
+			}
+			break;
+		case "dob":
+			response.setContentType("text/html");
+			String dob = request.getParameter("dob");
+			pw = response.getWriter();
+			if (dob.matches(dobPattern)) {
+				pw.println(1);
+
+			} else {
+				pw.println(0);
+			}
+			break;
+		default:
+			break;
+		}
+//		doGet(request, response);
 	}
 
 }
